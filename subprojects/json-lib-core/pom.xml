@@ -4,16 +4,30 @@
   <groupId>org.kordamp.json</groupId>
   <artifactId>json-lib-core</artifactId>
   <version>3.2.0-20251005_talend</version>
+
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
+    <talend.snapshots.repo>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/</talend.snapshots.repo>
+    <talend.releases.repo>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceRelease/</talend.releases.repo>
   </properties>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>talend_nexus_deployment</id>
+      <url>${talend.snapshots.repo}</url>
+    </snapshotRepository>
+    <repository>
+      <id>talend_nexus_deployment</id>
+      <url>${talend.releases.repo}</url>
+    </repository>
+  </distributionManagement>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.13.2</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>commons-beanutils</groupId>
@@ -28,7 +42,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.17.0</version>
+      <version>3.18.0</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
