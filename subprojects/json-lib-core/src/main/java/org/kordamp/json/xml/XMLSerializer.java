@@ -1712,6 +1712,14 @@ public class XMLSerializer {
         return str;
     }
 
+    public void setUseEmptyStrings(boolean useEmptyStrings) {
+        this.useEmptyStrings = useEmptyStrings;
+    }
+
+    public boolean isUseEmptyStrings() {
+        return this.useEmptyStrings;
+    }
+
     private boolean typeDoesntSupportEmptyValues(String type) {
         return (type.equalsIgnoreCase(JSONTypes.BOOLEAN)
                 || type.equalsIgnoreCase(JSONTypes.FLOAT)
