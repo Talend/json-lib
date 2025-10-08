@@ -49,6 +49,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -181,6 +182,11 @@ public class XMLSerializer {
     private boolean useEmptyStrings;
 
     /**
+     * flag to use scientific notation while working with Float values.
+     */
+    private boolean useScientificNotation;
+
+    /**
      * flag for sorting object properties by name
      */
     private boolean sortPropertyNames;
@@ -238,6 +244,7 @@ public class XMLSerializer {
         setEscapeLowerChars(false);
         setKeepArrayName(false);
         setSortPropertyNames(false); // TODO jenkinsci/json-lib requires this to be set to true
+        setUseScientificNotation( false );
     }
 
     /**
@@ -544,10 +551,25 @@ public class XMLSerializer {
     }
 
     /**
+     * Sets whether to use scientific notation while working with Float values.
+     * @param useScientificNotation Value of the useScientificNotation to set.
+     */
+    public void setUseScientificNotation(boolean useScientificNotation) {
+        this.useScientificNotation = useScientificNotation;
+    }
+
+    /**
      * Returns true if JSON types will be included as attributes.
      */
     public boolean isTypeHintsEnabled() {
         return typeHintsEnabled;
+    }
+
+    /**
+     * @return the useScientificNotation value
+     */
+    public boolean isUseScientificNotation() {
+        return useScientificNotation;
     }
 
     /**
@@ -1483,12 +1505,12 @@ public class XMLSerializer {
                             jsonArray.element(Integer.valueOf(element.getValue()));
                         }
                     } catch (NumberFormatException e) {
-                        jsonArray.element(Double.valueOf(element.getValue()));
+                        jsonArray.element(processFloatValues(element));
                     }
                 } else if (type.compareToIgnoreCase(JSONTypes.INTEGER) == 0) {
                     jsonArray.element(Integer.valueOf(element.getValue()));
                 } else if (type.compareToIgnoreCase(JSONTypes.FLOAT) == 0) {
-                    jsonArray.element(Double.valueOf(element.getValue()));
+                    jsonArray.element(processFloatValues(element));
                 } else if (type.compareToIgnoreCase(JSONTypes.FUNCTION) == 0) {
                     String[] params = null;
                     String text = element.getValue();
@@ -1520,6 +1542,14 @@ public class XMLSerializer {
                     }
                 }
             }
+        }
+    }
+
+    private Object processFloatValues(Element element) {
+        if (!isUseScientificNotation()) {
+            return new BigDecimal(element.getValue());
+        } else {
+            return Double.valueOf(element.getValue());
         }
     }
 
@@ -1574,12 +1604,12 @@ public class XMLSerializer {
                             setOrAccumulate(jsonObject, key, Integer.valueOf(element.getValue()));
                         }
                     } catch (NumberFormatException e) {
-                        setOrAccumulate(jsonObject, key, Double.valueOf(element.getValue()));
+                        setOrAccumulate(jsonObject, key, processFloatValues(element));
                     }
                 } else if (type.compareToIgnoreCase(JSONTypes.INTEGER) == 0) {
                     setOrAccumulate(jsonObject, key, Integer.valueOf(element.getValue()));
                 } else if (type.compareToIgnoreCase(JSONTypes.FLOAT) == 0) {
-                    setOrAccumulate(jsonObject, key, Double.valueOf(element.getValue()));
+                    setOrAccumulate(jsonObject, key, processFloatValues(element));
                 } else if (type.compareToIgnoreCase(JSONTypes.FUNCTION) == 0) {
                     String[] params = null;
                     String text = element.getValue();
