@@ -168,6 +168,12 @@ public class XMLSerializer {
      * flag for if try to convert integer numbers as long
      */
     private boolean useLongDecimals;
+
+    /**
+     * flag for if parse empty elements as empty strings
+     */
+    private boolean useEmptyStrings;
+
     /**
      * flag for sorting object properties by name
      */
@@ -914,6 +920,8 @@ public class XMLSerializer {
                 clazz = JSONTypes.OBJECT;
             } else if (JSONTypes.ARRAY.compareToIgnoreCase(clazzText) == 0) {
                 clazz = JSONTypes.ARRAY;
+            } else if(JSONTypes.STRING.equalsIgnoreCase(clazzText)) {
+                clazz = JSONTypes.STRING;
             }
         }
         return clazz;
@@ -1563,6 +1571,8 @@ public class XMLSerializer {
                     String text = element.getValue();
                     params = StringUtils.split(paramsAttribute.getValue(), ",");
                     setOrAccumulate(jsonObject, key, new JSONFunction(params, text));
+                } else if( useEmptyStrings && clazz != null && clazz.equalsIgnoreCase(JSONTypes.STRING) ) {
+                    setTextValue(jsonObject, key, element);
                 } else {
                     Attribute typeAttr = element.getAttribute(addJsonPrefix("type"));
                     if (typeAttr != null && isBlank(element.getValue()) &&
@@ -1574,17 +1584,21 @@ public class XMLSerializer {
                         setOrAccumulate(jsonObject, key, simplifyValue(jsonObject,
                             processObjectElement(element, defaultType)));
                     } else {
-                        String value;
-                        if (keepCData && isCData(element)) {
-                            value = "<![CDATA[" + element.getValue() + "]]>";
-                        } else {
-                            value = element.getValue();
-                        }
-                        setOrAccumulate(jsonObject, key, trimSpaceFromValue(value));
+                        setTextValue(jsonObject, key, element);
                     }
                 }
             }
         }
+    }
+
+    private void setTextValue(final JSONObject jsonObject, final String key, final Element element) {
+        String value;
+        if( keepCData && isCData( element ) ){
+            value = "<![CDATA[" + element.getValue() + "]]>";
+        }else{
+            value = element.getValue();
+        }
+        setOrAccumulate( jsonObject, key, trimSpaceFromValue( value ) );
     }
 
     private boolean isCData(Element element) {
