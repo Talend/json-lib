@@ -1528,8 +1528,7 @@ public class XMLSerializer {
                         params = StringUtils.split(paramsAttribute.getValue(), ",");
                         jsonArray.element(new JSONFunction(params, text));
                     } else {
-                        //                    JsonConfig config = new JsonConfig();
-                        //                    config.setParseJsonLiterals(parseJsonLiterals);
+                        config.setParseJsonLiterals(parseJsonLiterals);
                         if (isArray(element, false)) {
                             JSON value = processArrayElement(element, defaultType);
                             jsonArray.element(value, config);
