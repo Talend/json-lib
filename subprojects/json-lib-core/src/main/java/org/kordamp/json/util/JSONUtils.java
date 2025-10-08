@@ -114,15 +114,16 @@ public final class JSONUtils {
             return "null";
         }
 
-        // Shave off trailing zeros, if possible, but preserve a single zero after decimal point
+        // Shave off trailing zeros. Keep decimal to keep type double
 
         String s = Double.toString(d);
         if (s.indexOf('.') > 0 && s.indexOf('e') < 0 && s.indexOf('E') < 0) {
-            while (s.endsWith("0")) {
-                s = s.substring(0, s.length() - 1);
-            }
-            if (s.endsWith(".")) {
-                s = s + '0';
+            while(s.charAt(s.length() - 1) == '0'){
+                if(s.endsWith(".0")){
+                    break;
+                }
+
+                s = s.substring( 0, s.length() - 1 );
             }
         }
         return s;
