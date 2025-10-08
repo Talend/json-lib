@@ -165,6 +165,10 @@ public class XMLSerializer {
      */
     private boolean keepArrayName;
     /**
+     * flag for if try to convert integer numbers as long
+     */
+    private boolean useLongDecimals;
+    /**
      * flag for sorting object properties by name
      */
     private boolean sortPropertyNames;
@@ -539,6 +543,14 @@ public class XMLSerializer {
      */
     public void setTypeHintsEnabled(boolean typeHintsEnabled) {
         this.typeHintsEnabled = typeHintsEnabled;
+    }
+
+    /**
+     * Sets whether convert long integers to Long or Double (exponential) format
+     * @param useLongDecimals
+     */
+    public void setUseLongDecimals(boolean useLongDecimals) {
+        this.useLongDecimals = useLongDecimals;
     }
 
     /**
@@ -1523,7 +1535,11 @@ public class XMLSerializer {
             } else if (type.compareToIgnoreCase(JSONTypes.NUMBER) == 0) {
                 // try integer first
                 try {
-                    setOrAccumulate(jsonObject, key, Integer.valueOf(element.getValue()));
+                    if (useLongDecimals) {
+                        setOrAccumulate(jsonObject, key, Long.valueOf(element.getValue()));
+                    } else {
+                        setOrAccumulate(jsonObject, key, Integer.valueOf(element.getValue()));
+                    }
                 } catch (NumberFormatException e) {
                     setOrAccumulate(jsonObject, key, Double.valueOf(element.getValue()));
                 }
