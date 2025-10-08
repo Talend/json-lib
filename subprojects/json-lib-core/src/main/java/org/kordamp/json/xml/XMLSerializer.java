@@ -34,6 +34,7 @@ import org.kordamp.json.JSONFunction;
 import org.kordamp.json.JSONNull;
 import org.kordamp.json.JSONObject;
 import org.kordamp.json.JsonConfig;
+import org.kordamp.json.JsonStandard;
 import org.kordamp.json.util.JSONUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,6 +169,11 @@ public class XMLSerializer {
      * flag for if try to convert integer numbers as long
      */
     private boolean useLongDecimals;
+
+    /**
+     * The config parameter to wrap "null" strings as strings instead of JsonNull.
+     */
+    private JsonStandard jsonStandard;
 
     /**
      * flag for if parse empty elements as empty strings
@@ -559,6 +565,10 @@ public class XMLSerializer {
         this.useLongDecimals = useLongDecimals;
     }
 
+    public void setJsonStandard(JsonStandard jsonStandard) {
+        this.jsonStandard = jsonStandard;
+    }
+
     /**
      * Returns the set of XML elements that force their children to be treated as array elements.
      */
@@ -593,17 +603,19 @@ public class XMLSerializer {
                 return JSONNull.getInstance();
             }
             String defaultType = getType(root, JSONTypes.STRING);
+            JsonConfig config = new JsonConfig();
+            config.setJsonStandard(jsonStandard);
             if (isArray(root, true)) {
                 json = processArrayElement(root, defaultType);
                 if (forceTopLevelObject) {
                     String key = removeNamespacePrefix(root.getQualifiedName());
-                    json = new JSONObject().element(key, json);
+                    json = new JSONObject().element(key, json, config);
                 }
             } else {
                 json = processObjectElement(root, defaultType);
                 if (forceTopLevelObject) {
                     String key = removeNamespacePrefix(root.getQualifiedName());
-                    json = new JSONObject().element(key, json);
+                    json = new JSONObject().element(key, json, config);
                 }
             }
         } catch (JSONException jsone) {
@@ -1411,14 +1423,16 @@ public class XMLSerializer {
     }
 
     private void setOrAccumulate(JSONObject jsonObject, String key, Object value) {
+        JsonConfig config = new JsonConfig();
+        config.setJsonStandard(jsonStandard);
         if (jsonObject.has(key)) {
-            jsonObject.accumulate(key, value);
+            jsonObject.accumulate(key, value, config);
             Object val = jsonObject.get(key);
             if (val instanceof JSONArray) {
                 ((JSONArray) val).setExpandElements(true);
             }
         } else {
-            jsonObject.element(key, value);
+            jsonObject.element( key, value, config);
         }
     }
 
@@ -1426,9 +1440,10 @@ public class XMLSerializer {
         String clazz = getClass(element);
         String type = getType(element);
         type = (type == null) ? defaultType : type;
-
+        JsonConfig config = new JsonConfig();
+        config.setJsonStandard(jsonStandard);
         if (hasNamespaces(element) && !skipNamespaces) {
-            jsonArray.element(simplifyValue(null, processElement(element, type)));
+            jsonArray.element(simplifyValue(null, processElement(element, type)), config);
             return;
         } else if (element.getAttributeCount() > 0) {
             if (isFunction(element)) {
@@ -1439,7 +1454,7 @@ public class XMLSerializer {
                 jsonArray.element(new JSONFunction(params, text));
                 return;
             } else {
-                jsonArray.element(simplifyValue(null, processElement(element, type)));
+                jsonArray.element(simplifyValue(null, processElement(element, type)), config);
                 return;
             }
         }
@@ -1447,10 +1462,10 @@ public class XMLSerializer {
         boolean classProcessed = false;
         if (clazz != null) {
             if (clazz.compareToIgnoreCase(JSONTypes.ARRAY) == 0) {
-                jsonArray.element(processArrayElement(element, type));
+                jsonArray.element(processArrayElement(element, type), config);
                 classProcessed = true;
             } else if (clazz.compareToIgnoreCase(JSONTypes.OBJECT) == 0) {
-                jsonArray.element(simplifyValue(null, processObjectElement(element, type)));
+                jsonArray.element(simplifyValue(null, processObjectElement( element, type)), config);
                 classProcessed = true;
             }
         }
@@ -1485,8 +1500,8 @@ public class XMLSerializer {
                     params = StringUtils.split(paramsAttribute.getValue(), ",");
                     jsonArray.element(new JSONFunction(params, text));
                 } else {
-                    JsonConfig config = new JsonConfig();
-                    config.setParseJsonLiterals(parseJsonLiterals);
+//                    JsonConfig config = new JsonConfig();
+//                    config.setParseJsonLiterals(parseJsonLiterals);
                     if (isArray(element, false)) {
                         JSON value = processArrayElement(element, defaultType);
                         jsonArray.element(value, config);

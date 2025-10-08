@@ -242,7 +242,8 @@ abstract class AbstractJSON implements JSON {
     }
 
     protected Object _processValue(Object value, JsonConfig jsonConfig) {
-        if (JSONNull.getInstance().equals(value)) {
+        if( JSONNull.getInstance().equals( value ) &&
+                ((jsonConfig.getJsonStandard() != JsonStandard.WRAP_NULL_STRINGS) || !"null".equals(value))) {
             return JSONNull.getInstance();
         } else if (Class.class.isAssignableFrom(value.getClass()) || value instanceof Class) {
             return ((Class) value).getName();

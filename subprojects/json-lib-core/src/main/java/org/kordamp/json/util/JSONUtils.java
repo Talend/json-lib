@@ -30,6 +30,7 @@ import org.kordamp.json.JSONNull;
 import org.kordamp.json.JSONObject;
 import org.kordamp.json.JSONString;
 import org.kordamp.json.JsonConfig;
+import org.kordamp.json.JsonStandard;
 import org.kordamp.json.regexp.RegexpUtils;
 
 import java.math.BigDecimal;
@@ -787,6 +788,76 @@ public final class JSONUtils {
             return ((JSONArray) value).toString(indentFactor, indent);
         }
         return quote(value.toString());
+    }
+
+    public static String jsonToStandardizedString(JSON json, JsonStandard standard) {
+        switch (standard) {
+        case WRAP_NULL_STRINGS:
+            if (json.isArray()) {
+                JSONArray jsonArray = (JSONArray) json;
+                return jsonArrayToWrappedNullStrings(jsonArray);
+            } else if (!JSONNull.getInstance().equals(json)) {
+                return jsonToWrappedNullStrings((JSONObject) json);
+            }
+        default:
+            return json.toString();
+        }
+    }
+
+
+    /**
+     *
+     * @return plain String from JSONObject (@see JSONObject#toString()), but wrap null strings to quotation
+     */
+    private static String jsonToWrappedNullStrings(JSONObject json) {
+        if (json.isNullObject()) {
+            return JSONNull.getInstance()
+                    .toString();
+        }
+        try {
+            Iterator keys = json.keys();
+            StringBuilder sb = new StringBuilder("{");
+
+            while (keys.hasNext()) {
+                if (sb.length() > 1) {
+                    sb.append(',');
+                }
+                Object o = keys.next();
+                sb.append(quote(o.toString()));
+                sb.append(':');
+                sb.append(valueToStringWrappedNullStrings(json.get(o)));
+            }
+            sb.append('}');
+            return sb.toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static String jsonArrayToWrappedNullStrings(JSONArray jsonArray) {
+        final String separator = ",";
+        StringBuilder sb = new StringBuilder("[");
+
+        for (int i = 0; i < jsonArray.size(); i++) {
+            if (i > 0) {
+                sb.append(separator);
+            }
+            sb.append(JSONUtils.valueToStringWrappedNullStrings(jsonArray.get(i)));
+        }
+
+        return sb.append("]").toString();
+    }
+
+    private static String valueToStringWrappedNullStrings(Object o) {
+        if ("null".equals(o)) {
+            return quote(o.toString());
+        } else if (o instanceof JSONArray) {
+            return jsonArrayToWrappedNullStrings((JSONArray) o);
+        } else if (o instanceof JSONObject) {
+            return jsonToWrappedNullStrings((JSONObject) o);
+        } else {
+            return valueToString(o);
+        }
     }
 
     /**

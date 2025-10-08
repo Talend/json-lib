@@ -90,7 +90,6 @@ public class JsonConfig {
     private boolean handleJettisonEmptyElement;
     private boolean handleJettisonSingleElementArray;
     private boolean ignoreDefaultExcludes;
-    //private boolean ignoreJPATransient;
     private boolean ignoreTransientFields;
     private boolean ignorePublicFields = true;  // TODO jenkisci/json-lib changed this to false
     private boolean ignoreUnreadableProperty = true;
@@ -118,6 +117,7 @@ public class JsonConfig {
     private List ignoreFieldAnnotations = new ArrayList();
     private boolean allowNonStringKeys = false;
     private boolean parseJsonLiterals = true;
+    private JsonStandard jsonStandard = JsonStandard.LEGACY;
 
     public JsonConfig() {
     }
@@ -833,6 +833,19 @@ public class JsonConfig {
     public void setNewBeanInstanceStrategy(NewBeanInstanceStrategy newBeanInstanceStrategy) {
         this.newBeanInstanceStrategy = newBeanInstanceStrategy == null ? DEFAULT_NEW_BEAN_INSTANCE_STRATEGY
             : newBeanInstanceStrategy;
+    }
+
+    /**
+     * Sets the config to wrap "null" strings as strings instead of JsonNull.
+     *
+     */
+
+    public void setJsonStandard(JsonStandard wrapNullStringValues) {
+        this.jsonStandard = wrapNullStringValues;
+    }
+
+    public JsonStandard getJsonStandard() {
+        return jsonStandard;
     }
 
     /**
