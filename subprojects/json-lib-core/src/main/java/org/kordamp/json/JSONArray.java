@@ -1159,7 +1159,12 @@ public final class JSONArray extends AbstractJSON implements JSON, List<Object>,
                         tokener.back();
                         Object v = tokener.nextValue(jsonConfig);
                         if (!JSONUtils.isFunctionHeader(v)) {
-                            jsonArray.addValue(v, jsonConfig);
+                            if (v instanceof String && JSONUtils.mayBeJSON((String) v)) {
+                                jsonArray.addValue(JSONUtils.DOUBLE_QUOTE + v + JSONUtils.DOUBLE_QUOTE,
+                                        jsonConfig);
+                            } else {
+                                jsonArray.addValue(v, jsonConfig);
+                            }
                             fireElementAddedEvent(index, jsonArray.get(index++), jsonConfig);
                         } else {
                             // read params if any

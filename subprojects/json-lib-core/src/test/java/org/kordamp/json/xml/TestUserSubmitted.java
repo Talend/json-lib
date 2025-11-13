@@ -224,7 +224,7 @@ public class TestUserSubmitted extends TestCase {
     public void testEmptyStringWithHints() {
         String testXML = "<o><test1 type=\"string\" /></o>";
 
-        JSON expected = JSONSerializer.toJSON("{\"o\": {\"test1\": \"\"}}");
+        JSON expected = JSONSerializer.toJSON("{\"o\": {\"test1\": \"[]\"}}");
 
         JSONObject actual = convertXML(testXML);
         assertNotNull(actual);

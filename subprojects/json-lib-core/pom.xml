@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kordamp.json</groupId>
   <artifactId>json-lib-core</artifactId>
-  <version>3.2.0-20251005_talend</version>
+  <version>3.2.1-20251113_talend</version>
 
   <properties>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
     <talend.snapshots.repo>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/</talend.snapshots.repo>
     <talend.releases.repo>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceRelease/</talend.releases.repo>
   </properties>

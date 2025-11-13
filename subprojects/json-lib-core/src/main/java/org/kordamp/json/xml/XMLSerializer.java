@@ -1628,11 +1628,13 @@ public class XMLSerializer {
                     } else if (useEmptyStrings && clazz != null && clazz.equalsIgnoreCase(JSONTypes.STRING)) {
                         setTextValue(jsonObject, key, element);
                     } else {
+                        //Cause regression QTDI-2206
                         Attribute typeAttr = element.getAttribute(addJsonPrefix("type"));
-                        if (typeAttr != null && isBlank(element.getValue()) &&
-                                element.getChildCount() == 0 && element.getChildElements().size() == 0) {
-                            setOrAccumulate(jsonObject, key, "");
-                        } else if (isArray(element, false)) {
+//                        if (typeAttr != null && isBlank(element.getValue()) &&
+//                                element.getChildCount() == 0 && element.getChildElements().size() == 0) {
+//                            setOrAccumulate(jsonObject, key, "");
+//                        } else
+                        if (isArray(element, false)) {
                             setOrAccumulate(jsonObject, key, processArrayElement(element, defaultType));
                         } else if (isObject(element, false)) {
                             setOrAccumulate(jsonObject, key, simplifyValue(jsonObject,

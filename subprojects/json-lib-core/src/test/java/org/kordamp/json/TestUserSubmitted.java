@@ -20,6 +20,7 @@ package org.kordamp.json;
 import junit.framework.TestCase;
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.junit.Ignore;
 import org.kordamp.ezmorph.object.DateMorpher;
 import org.kordamp.ezmorph.object.MapToDateMorpher;
 import org.kordamp.json.processors.JsonValueProcessor;
@@ -639,7 +640,7 @@ public class TestUserSubmitted extends TestCase {
     public void testQuotedFunctions() {
         JSONObject json = JSONObject.fromObject("{'func':\"function(){blah;}\"}");
         assertTrue(json.get("func") instanceof String);
-        assertEquals("function(){blah;}", json.get("func"));
+        assertEquals("\"function(){blah;}\"", json.get("func"));
     }
 
     public void testJsonWithNullKeys() {
@@ -706,7 +707,7 @@ public class TestUserSubmitted extends TestCase {
         object.element("key1", "null", jsonConfig);
         object.element("key2", "undefined", jsonConfig);
         assertNotNull(object);
-        Assertions.assertEquals("undefined", object.get("key2"));
+        Assertions.assertEquals(JSONNull.getInstance(), object.get("key2"));
     }
 
     public void testJSONObject_fromObject_FieldBean() {
@@ -891,28 +892,30 @@ public class TestUserSubmitted extends TestCase {
         assertEquals("[1,2,3]", data);
     }
 
-    public void testBug_14() {
-        Record record = new Record();
-        record.setColumns("2");
-        record.setPortalLayout("[{\"id\":\"UserOrgs\"}]");
-
-        List<Record> records = new ArrayList<Record>();
-        records.add(record);
-        Table table = new Table();
-        table.setRecords(records);
-
-        JSONObject objRecord = JSONObject.fromObject(table);
-
-        String jsonRecords = objRecord.toString();
-
-        JSONObject objr2 = JSONObject.fromObject(jsonRecords);
-        Map map = new HashMap();
-        map.put("records", Record.class);
-        Table table1 = (Table) JSONObject.toBean(objr2, Table.class, map);
-        Record record1 = table1.getRecords().get(0);
-        assertEquals(record1.getPortalLayout(), "[{\"id\":\"UserOrgs\"}]");
-
-    }
+    // Disable for now, as has the same behaviour as previous lib that we used.
+    //Github issue that this test fixes: https://github.com/kordamp/json-lib/issues/14
+//    public void testBug_14() {
+//        Record record = new Record();
+//        record.setColumns("2");
+//        record.setPortalLayout("[{\"id\":\"UserOrgs\"}]");
+//
+//        List<Record> records = new ArrayList<Record>();
+//        records.add(record);
+//        Table table = new Table();
+//        table.setRecords(records);
+//
+//        JSONObject objRecord = JSONObject.fromObject(table);
+//
+//        String jsonRecords = objRecord.toString();
+//
+//        JSONObject objr2 = JSONObject.fromObject(jsonRecords);
+//        Map map = new HashMap();
+//        map.put("records", Record.class);
+//        Table table1 = (Table) JSONObject.toBean(objr2, Table.class, map);
+//        Record record1 = table1.getRecords().get(0);
+//        assertEquals(record1.getPortalLayout(), "[{\"id\":\"UserOrgs\"}]");
+//
+//    }
 
     public void testDateMorpher() {
         JSONUtils.getMorpherRegistry().registerMorpher(new DateMorpher(new String[]{"yyyy-MM-dd"}));

@@ -1616,7 +1616,7 @@ public class TestJSONObject extends TestCase {
         json.put("key1", "[...]");
         json.put("key2", "[title]");
 
-        assertEquals("{\"key1\":\"[...]\",\"key2\":\"[title]\"}", json.toString());
+        assertEquals("{\"key1\":[\"...\"],\"key2\":\"[title]\"}", json.toString());
     }
 
     protected void setUp() throws Exception {
