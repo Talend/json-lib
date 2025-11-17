@@ -17,6 +17,8 @@
  */
 package org.kordamp.json.util;
 
+import java.math.BigDecimal;
+
 import org.apache.commons.lang3.math.NumberUtils;
 import org.kordamp.json.JSONArray;
 import org.kordamp.json.JSONException;
@@ -433,7 +435,7 @@ public class JSONTokener {
             }
 
             try {
-                return NumberUtils.createNumber(s);
+                return createNumber(s);
             } catch (Exception e) {
                 return s;
             }
@@ -452,6 +454,26 @@ public class JSONTokener {
         }
 
         return s;
+    }
+
+    /**
+     * This method has been added to fix https://jira.talendforge.org/browse/TDI-42689
+     *
+     * @param s The String representation of the number
+     * @return The Number instance
+     */
+    private Number createNumber(String s){
+        boolean isDecimal = s.indexOf('.') != -1;
+
+        if(isDecimal){
+            Double d = Double.valueOf(s);
+            if(Double.POSITIVE_INFINITY == Math.abs(d)){
+                return new BigDecimal(s);
+            }
+            return d;
+        }
+
+        return NumberUtils.createNumber(s);
     }
 
     /**

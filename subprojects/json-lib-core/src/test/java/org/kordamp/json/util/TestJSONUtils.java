@@ -20,15 +20,32 @@ package org.kordamp.json.util;
 import junit.framework.TestCase;
 import org.kordamp.json.JSONArray;
 import org.kordamp.json.JSONException;
+import org.kordamp.json.JSONObject;
+import org.kordamp.json.JsonConfig;
+import org.kordamp.json.JsonStandard;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Andres Almiray
  */
 public class TestJSONUtils extends TestCase {
+
+    private static Map<String, String> valuesMap;
     public TestJSONUtils(String name) {
         super(name);
+    }
+
+    public void setUp() throws Exception {
+        super.setUp();
+        valuesMap = new LinkedHashMap<>();
+
+        valuesMap.put("key1", "null");
+        valuesMap.put("key2", "not_null");
     }
 
     public static void main(String[] args) {
@@ -45,6 +62,24 @@ public class TestJSONUtils extends TestCase {
 
     public void testDoubleToString_trailingZeros() {
         assertEquals("200.0", JSONUtils.doubleToString(200.00000));
+    }
+
+    public void testDoubleToString() {
+        Map<String, Double> expected = new HashMap<>();
+        expected.put("200.0", 200.0d);
+        expected.put("200.0", 200.000d);
+        expected.put("200.1", 200.1d);
+        expected.put("200.1", 200.10d);
+        expected.put("200.1", 200.1000d);
+        expected.put("200.12345", 200.12345d);
+        expected.put("200.12345", 200.123450000d);
+        expected.put("200.101", 200.101d);
+        expected.put("1.0E-8", 1.0E-8);
+        expected.put("200.0", 200d);
+
+        for(String key : expected.keySet()){
+            assertEquals(key,JSONUtils.doubleToString(expected.get(key)));
+        }
     }
 
     public void testGetFunctionParams() {
@@ -98,6 +133,28 @@ public class TestJSONUtils extends TestCase {
             fail("Should have thrown a JSONException");
         } catch (JSONException expected) {
             // ok
+        }
+    }
+
+    public void testNumberToString() {
+        Map<String, Number> expected = new HashMap<>();
+
+        expected.put("0", Integer.valueOf("00000"));
+        expected.put("123", Integer.valueOf("123"));
+        expected.put("-123", Integer.valueOf("-123"));
+
+        expected.put("0.0", Double.valueOf("0"));
+        expected.put("0.0", Double.valueOf("0.00000"));
+        expected.put("120.0001", Double.valueOf("120.0001000"));
+        expected.put("-120.0001", Double.valueOf("-120.0001000"));
+
+        expected.put("0.0", Float.valueOf("0"));
+        expected.put("0.0", Float.valueOf("0.00000"));
+        expected.put("120.0001", Float.valueOf("120.0001000"));
+        expected.put("-120.0001", Float.valueOf("-120.0001000"));
+
+        for(String key : expected.keySet()) {
+            assertEquals(key, JSONUtils.numberToString(expected.get(key)));
         }
     }
 
@@ -179,5 +236,49 @@ public class TestJSONUtils extends TestCase {
         } catch (JSONException expected) {
             // ok
         }
+    }
+
+    public void testNullStringsWrapped() {
+        JsonConfig config = new JsonConfig();
+        config.setJsonStandard(JsonStandard.WRAP_NULL_STRINGS);
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.putAll(valuesMap, config);
+
+        String resultingString = JSONUtils.jsonToStandardizedString(jsonObject, JsonStandard.WRAP_NULL_STRINGS);
+        assertFalse("Wrapping null strings standard's broken", Objects.equals(jsonObject.toString(), resultingString));
+        assertTrue(resultingString.contains("\"null\""));
+    }
+
+    public void testNullStringsUnwrapped() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.putAll(valuesMap);
+
+        String resultingString = JSONUtils.jsonToStandardizedString(jsonObject, JsonStandard.WRAP_NULL_STRINGS);
+        assertEquals(jsonObject.toString(), resultingString);
+    }
+
+    public void testNullStringsOnArrayWrapped() {
+        JsonConfig config = new JsonConfig();
+        config.setJsonStandard(JsonStandard.WRAP_NULL_STRINGS);
+
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.add("abc");
+        jsonArray.add("null", config);
+        jsonArray.add(null);
+
+        String resultingString = JSONUtils.jsonToStandardizedString(jsonArray, JsonStandard.WRAP_NULL_STRINGS);;
+        assertFalse("Wrapping null strings standard's broken", Objects.equals(jsonArray.toString(), resultingString));
+        assertTrue(resultingString.contains("\"null\""));
+    }
+
+    public void testNullStringsOnArrayUnwrapped() {
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.add("abc");
+        jsonArray.add("null");
+        jsonArray.add(null);
+
+        String resultingString = JSONUtils.jsonToStandardizedString(jsonArray, JsonStandard.LEGACY);
+        assertEquals(jsonArray.toString(), resultingString);
     }
 }
